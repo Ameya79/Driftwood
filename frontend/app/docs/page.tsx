@@ -199,8 +199,32 @@ with urllib.request.urlopen(req) as response:
 
           {/* Footer */}
           <footer className="app-footer" style={{ borderTop: "1px solid var(--color-border)", marginTop: 40, paddingTop: 24 }}>
-            <div className="footer-text">
-              Open source · MIT License · <Link href="/" className="footer-link">Simulator</Link>
+            <div className="footer-text" style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+              <span>Open source under MIT License</span>
+              <span>·</span>
+              <a
+                href="https://github.com/Ameya79/Driftwood"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link"
+                style={{ fontWeight: 600 }}
+              >
+                ★ Star on GitHub
+              </a>
+              <span>·</span>
+              <Link href="/" className="footer-link">
+                Simulator
+              </Link>
+              <span>·</span>
+              <span>Created by</span>
+              <a
+                href="https://www.linkedin.com/in/ameya-kulkarni-a31b74246?utm_source=share_via&utm_content=profile&utm_medium=member_android"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link"
+              >
+                Ameya Kulkarni
+              </a>
             </div>
           </footer>
         </main>

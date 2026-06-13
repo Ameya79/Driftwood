@@ -269,20 +269,32 @@ function DriftwoodApp() {
 
       {/* Footer */}
       <footer className="app-footer">
-        <div className="footer-text">
-          Open source · MIT License ·{" "}
+        <div className="footer-text" style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+          <span>Open source under MIT License</span>
+          <span>·</span>
           <a
-            href="https://github.com/driftwood"
+            href="https://github.com/Ameya79/Driftwood"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+            style={{ fontWeight: 600 }}
+          >
+            ★ Star on GitHub
+          </a>
+          <span>·</span>
+          <Link href="/docs" className="footer-link">
+            API Docs
+          </Link>
+          <span>·</span>
+          <span>Created by</span>
+          <a
+            href="https://www.linkedin.com/in/ameya-kulkarni-a31b74246?utm_source=share_via&utm_content=profile&utm_medium=member_android"
             target="_blank"
             rel="noopener noreferrer"
             className="footer-link"
           >
-            GitHub
-          </a>{" "}
-          ·{" "}
-          <Link href="/docs" className="footer-link">
-            API Docs
-          </Link>
+            Ameya Kulkarni
+          </a>
         </div>
         <div className="footer-text footer-disclaimer">
           Simulations are mathematical representations based on Geometric Brownian Motion and do not constitute financial advice.
