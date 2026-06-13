@@ -1,0 +1,10 @@
+name = "driftwood-worker"
+main = "src/index.ts"
+compatibility_date = "2024-04-01"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "<your-kv-namespace-id>"
+
+[vars]
+BACKEND_URL = "http://localhost:8000"
