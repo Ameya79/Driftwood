@@ -11,7 +11,7 @@ export default function DocsPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || window.location.origin;
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || (window.location.origin + "/api");
       setOrigin(apiBase);
       setFrontendOrigin(window.location.origin);
     }
@@ -96,6 +96,13 @@ with urllib.request.urlopen(req) as response:
               <a href="#js" className="docs-nav-link">JavaScript Fetch</a>
               <a href="#python" className="docs-nav-link">Python Script</a>
               <a href="#embed" className="docs-nav-link">HTML Iframe</a>
+            </div>
+          </div>
+
+          <div className="docs-nav-group">
+            <span className="docs-nav-title">Best Practices</span>
+            <div className="docs-nav-links">
+              <a href="#caching" className="docs-nav-link">API Caching & Limits</a>
             </div>
           </div>
         </aside>
@@ -204,6 +211,32 @@ with urllib.request.urlopen(req) as response:
               <li><code>paths</code>: A list of 100 sample simulated raw paths for background visual rendering.</li>
               <li><code>metrics</code>: Summary stats including <code>mean_final</code>, <code>volatility_annual</code>, and <code>prob_profit</code> (probability that the price ends higher than the starting price).</li>
             </ul>
+          </section>
+
+          {/* API Caching & Limits */}
+          <section id="caching" className="flex flex-col gap-3">
+            <h2 className="text-xl font-bold tracking-tight border-b border-slate-100 pb-2">Rate Limits & Client-Side Caching</h2>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              To guarantee high availability and protect upstream resources, the Driftwood API enforces a rate limit of <strong>100 requests per 5 seconds per IP address</strong>. If you exceed this rate, the API will return an HTTP <code>429 Too Many Requests</code> response.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              We strongly recommend caching simulation data in your own clients or backend proxy layers. Since stock trajectories rely on daily historical prices, running multiple identical simulations within the same day is redundant.
+            </p>
+            
+            <div className="bg-slate-50 border border-slate-100 p-4 flex flex-col gap-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">Caching Strategies</h4>
+              <ul className="list-disc pl-4 text-xs text-slate-600 flex flex-col gap-2">
+                <li>
+                  <strong>Local Storage (Browser)</strong>: For client-only apps, cache simulation payloads in <code>localStorage</code> or <code>sessionStorage</code> using a composite key like <code>driftwood:{"{"}ticker{"}"}:{"{"}days{"}"}:{"{"}sims{"}"}</code>. Set an expiration of 1-4 hours.
+                </li>
+                <li>
+                  <strong>Redis / Memcached (Backend)</strong>: If calling Driftwood from your own server, cache the JSON payloads in a key-value store using the same composite key. We recommend a <strong>5-minute to 1-hour Time-to-Live (TTL)</strong>.
+                </li>
+                <li>
+                  <strong>In-Memory Caches</strong>: For Python/Node backends, use in-memory cache helpers like Python&apos;s <code>functools.lru_cache</code> or Node&apos;s <code>memory-cache</code> to prevent redundant outgoing HTTP requests.
+                </li>
+              </ul>
+            </div>
           </section>
 
           {/* Footer */}

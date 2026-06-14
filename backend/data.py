@@ -61,6 +61,11 @@ def get_historical_prices(ticker: str, period: str = "1y") -> np.ndarray:
 
     prices = closes.values.flatten().astype(np.float64)
 
+    if np.any(prices <= 0):
+        raise ValueError(
+            f"Invalid price data for '{ticker_upper}': historical prices must be strictly positive"
+        )
+
     # 3. Write successful download to cache
     with _cache_lock:
         _prices_cache[ticker_upper] = (now, prices)

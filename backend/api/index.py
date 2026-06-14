@@ -13,7 +13,7 @@ import os
 import sys
 import logging
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 # Add parent directory to sys.path to allow imports when run locally or in Vercel serverless environment
@@ -44,6 +44,47 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# ── Rate Limiting ────────────────────────────────────────────────────────
+import time
+import threading
+from collections import defaultdict
+from fastapi.responses import JSONResponse
+
+class InMemoryRateLimiter:
+    def __init__(self, requests_limit: int = 100, window_seconds: int = 60):
+        self.requests_limit = requests_limit
+        self.window_seconds = window_seconds
+        self.history = defaultdict(list)
+        self.lock = threading.Lock()
+
+    def is_rate_limited(self, ip: str) -> bool:
+        now = time.time()
+        with self.lock:
+            # Clean up timestamps older than the window
+            self.history[ip] = [t for t in self.history[ip] if now - t < self.window_seconds]
+            if len(self.history[ip]) >= self.requests_limit:
+                return True
+            self.history[ip].append(now)
+            return False
+
+# Initialize rate limiter with 100 requests/5 seconds limit
+limiter = InMemoryRateLimiter(requests_limit=100, window_seconds=5)
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Only rate-limit heavy endpoints (simulation and metrics)
+    if request.url.path in ["/v1/simulate", "/v1/metrics"]:
+        forwarded_for = request.headers.get("x-forwarded-for")
+        client_ip = forwarded_for.split(",")[0].strip() if forwarded_for else (request.client.host if request.client else "unknown")
+        
+        if limiter.is_rate_limited(client_ip):
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Too many requests. Please try again later."}
+            )
+            
+    return await call_next(request)
 
 # ── CORS ─────────────────────────────────────────────────────────────────
 # In production, restrict to known frontend origins.
@@ -109,7 +150,7 @@ def get_api_calls():
         with urllib.request.urlopen(req) as response:
             res = json.loads(response.read().decode("utf-8"))
             val = res.get("result")
-            return int(val) if val else 0
+            return int(val) if val is not None else 0
     except Exception as e:
         logger.warning("Failed to get KV counter: %s", e)
         return 0
@@ -118,7 +159,7 @@ def get_api_calls():
 
 @app.get("/health", response_model=HealthResponse)
 async def health():
-    """Liveness check — used by Cloudflare Worker and self-host monitoring."""
+    """Liveness check — used for uptime monitoring."""
     return HealthResponse()
 
 

@@ -27,6 +27,13 @@ export default function SimulatorForm({
   const [simulations, setSimulations] = useState(defaults.simulations);
   const [copied, setCopied] = useState(false);
 
+  // Sync state if defaults change from the outside (e.g. URL query updates)
+  React.useEffect(() => {
+    setTicker(defaults.ticker);
+    setDays(defaults.days);
+    setSimulations(defaults.simulations);
+  }, [defaults]);
+
   const handleCopyApi = useCallback(() => {
     const curlCommand = generateCurlCommand({
       ticker: ticker.toUpperCase().trim() || "AAPL",

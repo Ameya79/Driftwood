@@ -30,3 +30,6 @@ Thumbs.db
 
 # Vercel / serverless build cache
 .vercel
+
+# Scratch / test files (may contain secrets)
+scratch/

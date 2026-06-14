@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { generateEmbedSnippet, type SimulationParams } from "@/lib/api";
 
 interface EmbedButtonProps {
@@ -9,7 +9,15 @@ interface EmbedButtonProps {
 
 export default function EmbedButton({ params }: EmbedButtonProps) {
   const [copied, setCopied] = useState(false);
-  const embedSnippet = generateEmbedSnippet(params);
+  const [origin, setOrigin] = useState("https://driftwood.run");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
+  const embedSnippet = generateEmbedSnippet(params, origin);
 
   const handleCopy = useCallback(async () => {
     try {

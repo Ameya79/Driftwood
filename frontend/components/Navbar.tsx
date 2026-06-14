@@ -128,6 +128,13 @@ export default function Navbar() {
                 >
                   Response JSON Structure
                 </a>
+                <a
+                  href="#caching"
+                  className="mobile-sidebar-sublink"
+                  onClick={() => setIsOpen(false)}
+                >
+                  API Caching & Limits
+                </a>
               </div>
             </>
           )}

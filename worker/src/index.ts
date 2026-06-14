@@ -39,21 +39,38 @@ function jsonResponse(data: unknown, status = 200): Response {
 
 // ── Rate Limiting ───────────────────────────────────────────────────────
 
-const RATE_LIMIT = 20; // requests per window
-const RATE_WINDOW_SECONDS = 60;
+const RATE_LIMIT = 100; // 100 requests per 5 seconds
+const RATE_WINDOW_MS = 5000;
 
-async function isRateLimited(ip: string, env: Env): Promise<boolean> {
-  const key = `rate:${ip}`;
-  const current = await env.CACHE.get(key);
-  const count = current ? parseInt(current, 10) : 0;
+const ipCache = new Map<string, { count: number; resetTime: number }>();
 
-  if (count >= RATE_LIMIT) {
-    return true;
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const data = ipCache.get(ip);
+
+  // Inline cleanup (1% chance) to prevent memory leak
+  if (Math.random() < 0.01) {
+    for (const [key, val] of ipCache.entries()) {
+      if (now > val.resetTime) {
+        ipCache.delete(key);
+      }
+    }
   }
 
-  await env.CACHE.put(key, String(count + 1), {
-    expirationTtl: RATE_WINDOW_SECONDS,
-  });
+  if (!data) {
+    ipCache.set(ip, { count: 1, resetTime: now + RATE_WINDOW_MS });
+    return false;
+  }
+
+  if (now > data.resetTime) {
+    ipCache.set(ip, { count: 1, resetTime: now + RATE_WINDOW_MS });
+    return false;
+  }
+
+  data.count++;
+  if (data.count > RATE_LIMIT) {
+    return true;
+  }
   return false;
 }
 
@@ -73,9 +90,9 @@ export default {
       return new Response("Not found", { status: 404 });
     }
 
-    // 3. Rate limit by IP
+    // 3. Rate limit by IP (in-memory)
     const clientIp = request.headers.get("CF-Connecting-IP") || "unknown";
-    if (await isRateLimited(clientIp, env)) {
+    if (isRateLimited(clientIp)) {
       return jsonResponse(
         { detail: "Rate limit exceeded. Try again in a minute." },
         429
@@ -122,7 +139,17 @@ export default {
         body: JSON.stringify({ ticker, days, simulations }),
       });
 
-      const data = await backendRes.json();
+      let data: any;
+      const contentType = backendRes.headers.get("Content-Type") || "";
+      if (contentType.includes("application/json")) {
+        data = await backendRes.json();
+      } else {
+        const text = await backendRes.text();
+        return jsonResponse(
+          { detail: `Backend returned non-JSON response (${backendRes.status}): ${text.substring(0, 200)}` },
+          500
+        );
+      }
 
       // 6. Cache successful responses for 5 minutes
       if (backendRes.ok) {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { generateCurlCommand, type SimulationParams } from "@/lib/api";
 
 interface CopyApiButtonProps {
@@ -9,7 +9,15 @@ interface CopyApiButtonProps {
 
 export default function CopyApiButton({ params }: CopyApiButtonProps) {
   const [copied, setCopied] = useState(false);
-  const curlCommand = generateCurlCommand(params);
+  const [origin, setOrigin] = useState("https://driftwood.run");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setOrigin(window.location.origin);
+    }
+  }, []);
+
+  const curlCommand = generateCurlCommand(params, origin);
 
   const handleCopy = useCallback(async () => {
     try {

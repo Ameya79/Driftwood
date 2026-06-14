@@ -34,9 +34,9 @@ export default function MetricsPanel({
   currentPrice,
   metrics,
 }: Omit<MetricsPanelProps, "ticker">) {
-  const p10Return = ((metrics.p10_final - currentPrice) / currentPrice) * 100;
-  const p50Return = ((metrics.p50_final - currentPrice) / currentPrice) * 100;
-  const p90Return = ((metrics.p90_final - currentPrice) / currentPrice) * 100;
+  const p10Return = currentPrice > 0 ? ((metrics.p10_final - currentPrice) / currentPrice) * 100 : 0;
+  const p50Return = currentPrice > 0 ? ((metrics.p50_final - currentPrice) / currentPrice) * 100 : 0;
+  const p90Return = currentPrice > 0 ? ((metrics.p90_final - currentPrice) / currentPrice) * 100 : 0;
 
   const profitPct = metrics.prob_profit * 100;
   const volPct = metrics.volatility_annual * 100;

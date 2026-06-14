@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: "standalone",
   async rewrites() {
     const backendTarget = process.env.WORKER_URL
       ? `${process.env.WORKER_URL}/api/:path*`

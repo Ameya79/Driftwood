@@ -1,55 +1,103 @@
-# Driftwood
+<p align="center">
+  <img src="frontend/public/logo.png" alt="Driftwood Logo" width="160" />
+</p>
 
-Driftwood is an open-source, API-first Monte Carlo risk engine designed to generate stock price trajectories for modeling equity risk, estimating option prices, and calculating Value-at-Risk (VaR) in financial applications. It simulates equity price paths using Geometric Brownian Motion (GBM) and ships with an interactive Next.js frontend, a FastAPI backend, and an iframe embed widget.
+<h1 align="center">Driftwood</h1>
 
-## Features
+<p align="center">
+  <strong>A free, stateless, high-performance Monte Carlo risk engine for stock price simulations.</strong>
+</p>
 
-- **Stochastic Path Generation**: Run simulations using Geometric Brownian Motion (GBM) dynamically calibrated to historical stock data.
-- **Percentile Tracking**: Access P10 (Bear), P50 (Median), and P90 (Bull) paths in a clean JSON format.
-- **Key Financial Metrics**: Calculate annualized volatility, probability of profit, and final mean values.
-- **Developer First**: Fully stateless API, no authentication keys required, with dynamic integration guides (cURL, JS, Python, HTML iFrame).
-- **Modern UI**: A white-themed, high-performance web dashboard built using Next.js and Recharts.
+<p align="center">
+  <img src="https://img.shields.io/github/license/Ameya79/Driftwood?style=flat-square&color=blue" alt="License" />
+  <img src="https://img.shields.io/badge/API-Stateless-green?style=flat-square" alt="API Stateless" />
+  <img src="https://img.shields.io/badge/Rate--Limit-100%20req%20%2F%205s-orange?style=flat-square" alt="Rate Limit" />
+</p>
 
 ---
 
-## Quick Start
+Driftwood is an open-source, API-first financial simulation suite designed to generate stock price trajectories for modeling equity risk, estimating option prices, and calculating Value-at-Risk (VaR). It calibrates its simulations dynamically using historical stock data, performing high-performance vectorized computations using Geometric Brownian Motion (GBM).
 
-### Run Locally
+The project includes:
+* ⚡ **Vectorized Simulation Engine**: High-performance Python/FastAPI backend using `numpy`.
+* 📊 **Beautiful Frontend**: Sleek dashboard built with Next.js 14 and Recharts.
+* 🔌 **Dynamic Embeds**: Lightweight iframe widget for seamless integration into external websites.
+* 🛡️ **Built-in Protection**: Native rate limiting (IP-based, 100 requests per 5 seconds) to prevent service abuse.
 
-Start the backend:
+---
+
+## 🔬 Mathematical Background
+
+Driftwood simulates future asset prices using a **Geometric Brownian Motion (GBM)** stochastic process:
+
+$$dS_t = \mu S_t dt + \sigma S_t dW_t$$
+
+Where:
+* $S_t$ is the asset price at time $t$.
+* $\mu$ is the drift coefficient (historical annualized return).
+* $\sigma$ is the diffusion coefficient (annualized volatility).
+* $W_t$ is a standard Brownian motion (Wiener process).
+
+By applying Itô's Lemma, the analytical solution used to generate individual simulation paths is:
+
+$$S_t = S_0 \exp\left( \left(\mu - \frac{\sigma^2}{2}\right)t + \sigma W_t \right)$$
+
+---
+
+## 🚀 Quick Start
+
+### Run via Docker Compose (Recommended)
+
+You can launch the complete stack (FastAPI backend + Next.js frontend + Nginx proxy with built-in rate-limiting) using Docker Compose:
+
+```bash
+docker-compose up --build
+```
+Once started, the services will be available at:
+* **Frontend / Portal**: `http://localhost:3000`
+* **FastAPI Documentation (Swagger)**: `http://localhost:8000/docs`
+
+### Run Locally (Development)
+
+#### 1. Start the FastAPI Backend
 ```bash
 cd backend
 pip install -r requirements.txt
 python -m uvicorn api.index:app --reload --port 8000
 ```
 
-Start the frontend in another terminal:
+#### 2. Start the Next.js Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-
-Open `http://localhost:3000` to run your first simulation.
+Open `http://localhost:3000` to view the interactive dashboard.
 
 ---
 
-## Integrating the API into your App
+## 🔌 Integrating the API
 
-You can call the Driftwood API from any frontend or backend application to bring Monte Carlo risk modeling to your users.
+Driftwood is stateless and **does not require API keys**. You can invoke the simulation engine directly from any backend or frontend application.
 
-### 1. The Request (JavaScript / TypeScript Fetch)
+### Endpoint: `POST /v1/simulate`
 
-Send a POST request to `/v1/simulate` with the target ticker, days to forecast, and number of simulation runs:
+#### Request Payload (JSON)
+| Parameter | Type | Default | Range | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `ticker` | `string` | *Required* | 1-5 chars | Uppercase stock symbol (e.g. `"AAPL"`) |
+| `days` | `integer` | `30` | `7` to `252` | Simulation horizon in trading days |
+| `simulations` | `integer` | `100` | `10` to `1000` | Number of simulation paths to run |
 
+#### Sample Request (JavaScript Fetch)
 ```javascript
-const response = await fetch("https://your-backend-url.vercel.app/v1/simulate", {
+const response = await fetch("http://localhost:8000/v1/simulate", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    ticker: "AAPL",       // Stock symbol (1-5 chars)
-    days: 30,             // Forecasting horizon (7-252 trading days)
-    simulations: 100      // Number of simulation paths (10-1000)
+    ticker: "AAPL",
+    days: 30,
+    simulations: 100
   })
 });
 
@@ -57,58 +105,60 @@ const data = await response.json();
 console.log(data);
 ```
 
-### 2. The Response Structure
-
-The API returns a clean JSON payload:
-
+#### Sample Response Structure
 ```json
 {
   "ticker": "AAPL",
   "current_price": 189.43,
   "percentiles": {
-    "p10": [189.43, 183.1, 180.2],  // Bearish envelope path
-    "p50": [189.43, 191.4, 192.5],  // Median expected path
-    "p90": [189.43, 199.7, 203.1]   // Bullish envelope path
+    "p10": [189.43, 183.1, 180.2],  // Bearish envelope path (10th percentile)
+    "p50": [189.43, 191.4, 192.5],  // Median expected path (50th percentile)
+    "p90": [189.43, 199.7, 203.1]   // Bullish envelope path (90th percentile)
   },
   "metrics": {
-    "mean_final": 193.21,           // Expected average final price
-    "p10_final": 171.30,
-    "p50_final": 191.40,
-    "p90_final": 218.70,
+    "mean_final": 193.21,
+    "p10_final": 171.3,
+    "p50_final": 191.4,
+    "p90_final": 218.7,
     "volatility_annual": 0.284,      // Annualized historical volatility
-    "prob_profit": 0.613             // Probability price ends higher than starting price
+    "prob_profit": 0.613             // Probability that the final price exceeds S_0
   }
 }
 ```
 
 ---
 
-## Architecture
+## 🛡️ Rate Limits & DDoS Protection
 
-```
-Browser (Next.js App)
-      │
-      │  /api/* (Next.js Rewrite Proxy)
-      ▼
-Vercel Serverless (FastAPI)  ← Monte Carlo engine, Thread-safe cache, yfinance
-```
+To prevent overloading and ensure consistent performance, the system implements a strict rate limit of **100 requests per 5 seconds per client IP**.
+
+* **FastAPI / Worker Middleware**: Exceeding the rate limit returns an `HTTP 429 Too Many Requests` response.
+* **Nginx Protection**: The reverse proxy uses native rate-limiting (`rate=20r/s` with a `burst=30` burst limit) to filter traffic before it reaches the backend.
 
 ---
 
-## Tech Stack
+## 💾 Caching Guidelines
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 14 (App Router) |
-| Styling | Custom Vanilla CSS + Tailwind |
-| Charts | Recharts |
-| Cache | Thread-Safe In-Memory |
-| Backend | FastAPI (Python 3.11+) |
-| Data | yfinance |
-| Math | numpy (vectorized simulation) |
+Because stock simulations rely on historical end-of-day market prices, running multiple identical simulations within a short timeframe is computationally redundant. 
+
+### Composite Cache Key Format
+We recommend constructing cache keys using the parameters of the request:
+`driftwood:{ticker}:{days}:{simulations}`
+
+### Caching Strategies
+1. **Client-side (Browser)**: Cache responses in `localStorage` or `sessionStorage` with a **1 to 4 hour TTL**.
+2. **Server-side (API Clients)**: Use an in-memory store (e.g. Redis or LRU cache) with a **5-minute to 1-hour TTL**.
 
 ---
 
-## License
+## 🛠️ Tech Stack
 
-MIT License — feel free to fork, self-host, and integrate into your own projects.
+- **Frontend**: Next.js 14 (App Router), Recharts, Vanilla CSS & Tailwind
+- **Backend**: FastAPI (Python 3.11+), NumPy, yfinance
+- **Infrastructure**: Nginx, Docker Compose, Cloudflare Workers
+
+---
+
+## 📄 License
+
+MIT License. Feel free to copy, modify, self-host, and integrate this simulation engine into your own products.
