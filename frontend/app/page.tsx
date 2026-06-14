@@ -31,6 +31,27 @@ function DriftwoodApp() {
   const [inspectorDay, setInspectorDay] = useState<number>(0);
   const [showCopyPanel, setShowCopyPanel] = useState(false);
   const [showEmbedPanel, setShowEmbedPanel] = useState(false);
+
+  const [totalCalls, setTotalCalls] = useState<number | null>(null);
+
+  // Fetch global stats on mount
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || window.location.origin;
+        const res = await fetch(`${apiBase}/v1/stats`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data.total_simulations === "number") {
+            setTotalCalls(data.total_simulations);
+          }
+        }
+      } catch (err) {
+        // Silent fallback
+      }
+    };
+    fetchStats();
+  }, []);
  
   // Auto-run if URL has params
   const [hasAutoRun, setHasAutoRun] = useState(false);
@@ -58,6 +79,9 @@ function DriftwoodApp() {
       try {
         const data = await runSimulation(newParams);
         setResult(data);
+
+        // Increment count locally so it updates immediately for the user
+        setTotalCalls((prev) => (prev !== null ? prev + 1 : 1));
  
         // Sync URL for shareable links
         const url = new URL(window.location.href);
@@ -112,6 +136,11 @@ function DriftwoodApp() {
           </div>
           <h1 className="hero-title">Driftwood</h1>
           <p className="hero-subtitle">Monte Carlo Risk Engine</p>
+          {totalCalls !== null && totalCalls > 0 && (
+            <p className="mt-2 text-xs font-mono text-slate-400">
+              {totalCalls.toLocaleString()} simulations run to date
+            </p>
+          )}
         </header>
 
 

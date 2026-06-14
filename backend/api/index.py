@@ -65,6 +65,45 @@ app.add_middleware(
 )
 
 
+import json
+import urllib.request
+
+KV_URL = os.getenv("KV_REST_API_URL")
+KV_TOKEN = os.getenv("KV_REST_API_TOKEN")
+
+def increment_api_calls():
+    if not KV_URL or not KV_TOKEN:
+        return
+    try:
+        url = f"{KV_URL}/incr/stats:api_calls"
+        req = urllib.request.Request(
+            url,
+            headers={"Authorization": f"Bearer {KV_TOKEN}"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req) as response:
+            pass
+    except Exception as e:
+        logger.warning("Failed to increment KV counter: %s", e)
+
+def get_api_calls():
+    if not KV_URL or not KV_TOKEN:
+        return 0
+    try:
+        url = f"{KV_URL}/get/stats:api_calls"
+        req = urllib.request.Request(
+            url,
+            headers={"Authorization": f"Bearer {KV_TOKEN}"},
+            method="GET"
+        )
+        with urllib.request.urlopen(req) as response:
+            res = json.loads(response.read().decode("utf-8"))
+            val = res.get("result")
+            return int(val) if val else 0
+    except Exception as e:
+        logger.warning("Failed to get KV counter: %s", e)
+        return 0
+
 # ── Routes ───────────────────────────────────────────────────────────────
 
 @app.get("/health", response_model=HealthResponse)
@@ -83,6 +122,9 @@ async def simulate(req: SimulationRequest):
     """
     prices = _fetch_prices(req.ticker)
     result = run_simulation(prices, req.days, req.simulations)
+    
+    # Track statistics
+    increment_api_calls()
 
     return SimulationResponse(
         ticker=req.ticker,
@@ -102,12 +144,22 @@ async def metrics(req: SimulationRequest):
     """
     prices = _fetch_prices(req.ticker)
     result = run_simulation(prices, req.days, req.simulations)
+    
+    # Track statistics
+    increment_api_calls()
 
     return MetricsResponse(
         ticker=req.ticker,
         current_price=result["current_price"],
         metrics=Metrics(**result["metrics"]),
     )
+
+
+@app.get("/v1/stats")
+async def stats():
+    """Get the total number of simulations run globally."""
+    calls = get_api_calls()
+    return {"total_simulations": calls}
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────
