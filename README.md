@@ -95,21 +95,6 @@ Vercel Serverless (FastAPI)  ← Monte Carlo engine, Thread-safe cache, yfinance
 
 ---
 
-## The Math
-
-Driftwood uses Geometric Brownian Motion (GBM) to forecast equity price paths:
-
-$$S(t+1) = S(t) \times \exp\left((\mu - \frac{\sigma^2}{2})\Delta t + \sigma\sqrt{\Delta t} \times Z\right)$$
-
-Where:
-- $S(t)$ = stock price at time $t$
-- $\mu$ = annualized historical drift
-- $\sigma$ = annualized historical volatility
-- $Z \sim N(0, 1)$ = standard normal random variable
-- $\Delta t = 1/252$ = single trading day step
-
----
-
 ## Tech Stack
 
 | Layer | Technology |

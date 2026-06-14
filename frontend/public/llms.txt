@@ -1,0 +1,82 @@
+# Driftwood API
+
+Driftwood is a free, stateless, and high-performance stock simulation API using Monte Carlo Geometric Brownian Motion (GBM). It does not require any authentication keys or headers.
+
+## Base URL
+https://your-backend-url.vercel.app
+
+Replace with your live deployed FastAPI Vercel URL.
+
+## API Endpoints
+
+### 1. Health Check
+`GET /health`
+- Description: Liveness and status check.
+- Response: `{"status": "ok", "version": "1.0.0"}`
+
+### 2. Run Simulation
+`POST /v1/simulate`
+- Description: Computes Monte Carlo price trajectories and final distribution statistics.
+- Request Headers:
+  - `Content-Type: application/json`
+- Request Body (JSON):
+  - `ticker` (string, required): 1-5 character uppercase stock ticker symbol (e.g., `"AAPL"`, `"TSLA"`).
+  - `days` (number, optional, default: 30, range: 7-252): Future trading days to simulate.
+  - `simulations` (number, optional, default: 100, range: 10-1000): Total number of paths to generate.
+- Response (JSON):
+  - `ticker` (string)
+  - `current_price` (number): Start price.
+  - `percentiles` (object):
+    - `p10` (array of numbers): Bearish price trajectory.
+    - `p50` (array of numbers): Median expected price trajectory.
+    - `p90` (array of numbers): Bullish price trajectory.
+  - `metrics` (object):
+    - `mean_final` (number): Expected average final price.
+    - `p10_final` (number): 10th percentile final price.
+    - `p50_final` (number): 50th percentile final price.
+    - `p90_final` (number): 90th percentile final price.
+    - `volatility_annual` (number): Annualized historical volatility.
+    - `prob_profit` (number): Probability the final price ends higher than the starting price (0.0 to 1.0).
+  - `paths` (array of arrays): A list of 100 sample raw simulation paths for rendering background lines.
+
+### 3. Run Metrics Only
+`POST /v1/metrics`
+- Description: Computes final distribution statistics without returning path arrays. Ideal for lightweight backtesting.
+- Request/Response Schema: Identical to `/v1/simulate` except the response omits `percentiles` and `paths`.
+
+## Integration Examples
+
+### JavaScript Fetch
+```javascript
+const response = await fetch("https://your-backend-url.vercel.app/v1/simulate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    ticker: "NVDA",
+    days: 30,
+    simulations: 100
+  })
+});
+const data = await response.json();
+console.log("Median projected price:", data.metrics.p50_final);
+```
+
+### Python Script
+```python
+import urllib.request
+import json
+
+url = "https://your-backend-url.vercel.app/v1/simulate"
+payload = {"ticker": "NVDA", "days": 30, "simulations": 100}
+
+req = urllib.request.Request(
+    url,
+    data=json.dumps(payload).encode("utf-8"),
+    headers={"Content-Type": "application/json"},
+    method="POST"
+)
+
+with urllib.request.urlopen(req) as response:
+    data = json.loads(response.read().decode("utf-8"))
+    print(f"Median final price: {data['metrics']['p50_final']}")
+```
