@@ -46,7 +46,7 @@ function DriftwoodApp() {
             setTotalCalls(data.total_simulations);
           }
         }
-      } catch (err) {
+      } catch {
         // Silent fallback
       }
     };
