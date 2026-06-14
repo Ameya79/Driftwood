@@ -16,31 +16,23 @@
 
 ---
 
-Driftwood is an open-source, API-first financial simulation suite designed to generate stock price trajectories for modeling equity risk, estimating option prices, and calculating Value-at-Risk (VaR). It calibrates its simulations dynamically using historical stock data, performing high-performance vectorized computations using Geometric Brownian Motion (GBM).
+## 🎯 Use Cases & Overview
 
-The project includes:
-* ⚡ **Vectorized Simulation Engine**: High-performance Python/FastAPI backend using `numpy`.
-* 📊 **Beautiful Frontend**: Sleek dashboard built with Next.js 14 and Recharts.
-* 🔌 **Dynamic Embeds**: Lightweight iframe widget for seamless integration into external websites.
-* 🛡️ **Built-in Protection**: Native rate limiting (IP-based, 100 requests per 5 seconds) to prevent service abuse.
+Driftwood is an open-source, API-first simulation suite designed to generate stock price trajectories for financial applications. Developers and quantitative analysts use Driftwood to:
+* **Model Equity Risk**: Estimate future price envelopes (bear, median, bull) to map risk boundaries.
+* **Price Options**: Simulate asset paths to evaluate option pricing models (e.g. Monte Carlo option pricing).
+* **Calculate Value-at-Risk (VaR)**: Compute statistical downside limits for portfolios.
+* **Embed Interactive Charts**: Integrate interactive simulator widgets directly into client dashboards or websites.
 
 ---
 
-## 🔬 Mathematical Background
+## ⚡ FastAPI-Powered Stateless API
 
-Driftwood simulates future asset prices using a **Geometric Brownian Motion (GBM)** stochastic process:
-
-$$dS_t = \mu S_t dt + \sigma S_t dW_t$$
-
-Where:
-* $S_t$ is the asset price at time $t$.
-* $\mu$ is the drift coefficient (historical annualized return).
-* $\sigma$ is the diffusion coefficient (annualized volatility).
-* $W_t$ is a standard Brownian motion (Wiener process).
-
-By applying Itô's Lemma, the analytical solution used to generate individual simulation paths is:
-
-$$S_t = S_0 \exp\left( \left(\mu - \frac{\sigma^2}{2}\right)t + \sigma W_t \right)$$
+Driftwood's backend is powered by a high-performance **FastAPI** server that is completely stateless. 
+* **Zero Keys/Credentials**: Developers can integrate simulation data instantly without needing to manage authentication keys.
+* **Vectorized Computations**: Calculations run in parallel using optimized `numpy` vectorization, returning 1,000 paths in milliseconds.
+* **Built-in Security**: Includes built-in sliding-window rate limiting to protect Upstash/Redis resources and prevent API abuse.
+* **Auto-generated Documentation**: Includes native Swagger UI (`/docs`) and ReDoc (`/redoc`) endpoints out of the box.
 
 ---
 
@@ -77,8 +69,6 @@ Open `http://localhost:3000` to view the interactive dashboard.
 ---
 
 ## 🔌 Integrating the API
-
-Driftwood is stateless and **does not require API keys**. You can invoke the simulation engine directly from any backend or frontend application.
 
 ### Endpoint: `POST /v1/simulate`
 
@@ -132,7 +122,7 @@ console.log(data);
 
 To prevent overloading and ensure consistent performance, the system implements a strict rate limit of **100 requests per 5 seconds per client IP**.
 
-* **FastAPI / Worker Middleware**: Exceeding the rate limit returns an `HTTP 429 Too Many Requests` response.
+* **FastAPI Middleware**: Exceeding the rate limit returns an `HTTP 429 Too Many Requests` response.
 * **Nginx Protection**: The reverse proxy uses native rate-limiting (`rate=20r/s` with a `burst=30` burst limit) to filter traffic before it reaches the backend.
 
 ---
@@ -148,6 +138,20 @@ We recommend constructing cache keys using the parameters of the request:
 ### Caching Strategies
 1. **Client-side (Browser)**: Cache responses in `localStorage` or `sessionStorage` with a **1 to 4 hour TTL**.
 2. **Server-side (API Clients)**: Use an in-memory store (e.g. Redis or LRU cache) with a **5-minute to 1-hour TTL**.
+
+---
+
+## 🔬 Mathematical Background
+
+Driftwood simulates future asset prices using a **Geometric Brownian Motion (GBM)** stochastic process:
+
+$$dS_t = \mu S_t dt + \sigma S_t dW_t$$
+
+Where $S_t$ is the asset price at time $t$, $\mu$ is the drift coefficient (historical annualized return), $\sigma$ is the diffusion coefficient (annualized volatility), and $W_t$ is a standard Brownian motion (Wiener process).
+
+By applying Itô's Lemma, the analytical solution used to generate individual simulation paths is:
+
+$$S_t = S_0 \exp\left( \left(\mu - \frac{\sigma^2}{2}\right)t + \sigma W_t \right)$$
 
 ---
 
