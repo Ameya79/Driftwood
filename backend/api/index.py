@@ -68,8 +68,8 @@ app.add_middleware(
 import json
 import urllib.request
 
-KV_URL = os.getenv("KV_REST_API_URL")
-KV_TOKEN = os.getenv("KV_REST_API_TOKEN")
+KV_URL = os.getenv("KV_REST_API_URL") or os.getenv("UPSTASH_REDIS_REST_URL")
+KV_TOKEN = os.getenv("KV_REST_API_TOKEN") or os.getenv("UPSTASH_REDIS_REST_TOKEN")
 
 def increment_api_calls():
     if not KV_URL or not KV_TOKEN:
