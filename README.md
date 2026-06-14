@@ -16,7 +16,7 @@
 
 ---
 
-## 🎯 Use Cases & Overview
+## Use Cases & Overview
 
 Driftwood is an open-source, API-first simulation suite designed to generate stock price trajectories for financial applications. Developers and quantitative analysts use Driftwood to:
 * **Model Equity Risk**: Estimate future price envelopes (bear, median, bull) to map risk boundaries.
@@ -26,7 +26,7 @@ Driftwood is an open-source, API-first simulation suite designed to generate sto
 
 ---
 
-## ⚡ FastAPI-Powered Stateless API
+## FastAPI-Powered Stateless API
 
 Driftwood's backend is powered by a high-performance **FastAPI** server that is completely stateless. 
 * **Zero Keys/Credentials**: Developers can integrate simulation data instantly without needing to manage authentication keys.
@@ -36,7 +36,7 @@ Driftwood's backend is powered by a high-performance **FastAPI** server that is 
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Run via Docker Compose (Recommended)
 
@@ -68,7 +68,7 @@ Open `http://localhost:3000` to view the interactive dashboard.
 
 ---
 
-## 🔌 Integrating the API
+## Integrating the API
 
 ### Endpoint: `POST /v1/simulate`
 
@@ -118,7 +118,7 @@ console.log(data);
 
 ---
 
-## 🛡️ Rate Limits & DDoS Protection
+## Rate Limits & DDoS Protection
 
 To prevent overloading and ensure consistent performance, the system implements a strict rate limit of **100 requests per 5 seconds per client IP**.
 
@@ -127,7 +127,7 @@ To prevent overloading and ensure consistent performance, the system implements 
 
 ---
 
-## 💾 Caching Guidelines
+## Caching Guidelines
 
 Because stock simulations rely on historical end-of-day market prices, running multiple identical simulations within a short timeframe is computationally redundant. 
 
@@ -141,7 +141,7 @@ We recommend constructing cache keys using the parameters of the request:
 
 ---
 
-## 🔬 Mathematical Background
+## Mathematical Background
 
 Driftwood simulates future asset prices using a **Geometric Brownian Motion (GBM)** stochastic process:
 
@@ -155,7 +155,7 @@ $$S_t = S_0 \exp\left( \left(\mu - \frac{\sigma^2}{2}\right)t + \sigma W_t \righ
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: Next.js 14 (App Router), Recharts, Vanilla CSS & Tailwind
 - **Backend**: FastAPI (Python 3.11+), NumPy, yfinance
@@ -163,6 +163,6 @@ $$S_t = S_0 \exp\left( \left(\mu - \frac{\sigma^2}{2}\right)t + \sigma W_t \righ
 
 ---
 
-## 📄 License
+## License
 
 MIT License. Feel free to copy, modify, self-host, and integrate this simulation engine into your own products.
