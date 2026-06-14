@@ -36,10 +36,36 @@ function DriftwoodApp() {
 
   // Fetch global stats on mount and poll periodically
   useEffect(() => {
+    // 1. Instantly restore from localStorage to prevent flash/disappearance on reload
+    let initialCachedVal: number | null = null;
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("driftwood_total_calls");
+      if (cached) {
+        initialCachedVal = parseInt(cached, 10);
+        setTotalCalls(initialCachedVal);
+      }
+    }
+
     const loadStats = async () => {
       try {
         const count = await fetchStats();
-        setTotalCalls(count);
+        if (typeof count === "number" && count >= 0) {
+          setTotalCalls((prev) => {
+            // Read latest cached value from localStorage inside the state updater 
+            // to avoid race conditions with React's asynchronous state rendering.
+            let latestCachedVal = initialCachedVal;
+            if (typeof window !== "undefined") {
+              const cached = localStorage.getItem("driftwood_total_calls");
+              if (cached) {
+                latestCachedVal = parseInt(cached, 10);
+              }
+            }
+            const currentVal = prev !== null ? prev : (latestCachedVal !== null ? latestCachedVal : 0);
+            const nextCount = Math.max(currentVal, count);
+            localStorage.setItem("driftwood_total_calls", String(nextCount));
+            return nextCount;
+          });
+        }
       } catch {
         // Silent fallback
       }
@@ -79,7 +105,11 @@ function DriftwoodApp() {
         setResult(data);
 
         // Increment count locally so it updates immediately for the user
-        setTotalCalls((prev) => (prev !== null ? prev + 1 : 1));
+        setTotalCalls((prev) => {
+          const nextCount = prev !== null ? prev + 1 : 1;
+          localStorage.setItem("driftwood_total_calls", String(nextCount));
+          return nextCount;
+        });
  
         // Sync URL for shareable links
         const url = new URL(window.location.href);

@@ -75,10 +75,14 @@ def increment_api_calls():
     if not KV_URL or not KV_TOKEN:
         return
     try:
-        url = f"{KV_URL}/incr/stats:api_calls"
+        body = json.dumps(["INCR", "stats:api_calls"]).encode("utf-8")
         req = urllib.request.Request(
-            url,
-            headers={"Authorization": f"Bearer {KV_TOKEN}"},
+            KV_URL,
+            data=body,
+            headers={
+                "Authorization": f"Bearer {KV_TOKEN}",
+                "Content-Type": "application/json"
+            },
             method="POST"
         )
         with urllib.request.urlopen(req) as response:
@@ -90,11 +94,15 @@ def get_api_calls():
     if not KV_URL or not KV_TOKEN:
         return 0
     try:
-        url = f"{KV_URL}/get/stats:api_calls"
+        body = json.dumps(["GET", "stats:api_calls"]).encode("utf-8")
         req = urllib.request.Request(
-            url,
-            headers={"Authorization": f"Bearer {KV_TOKEN}"},
-            method="GET"
+            KV_URL,
+            data=body,
+            headers={
+                "Authorization": f"Bearer {KV_TOKEN}",
+                "Content-Type": "application/json"
+            },
+            method="POST"
         )
         with urllib.request.urlopen(req) as response:
             res = json.loads(response.read().decode("utf-8"))
