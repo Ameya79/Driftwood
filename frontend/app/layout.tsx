@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     "quant finance",
     "open source",
   ],
+  verification: {
+    google: "8VloNPk7vdTnnOUBoNUVCvYdM3BeHPAbQwBPnncN3sw",
+  },
   openGraph: {
     title: "Driftwood — Monte Carlo Risk Engine",
     description:
