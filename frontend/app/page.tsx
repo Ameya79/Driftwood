@@ -106,7 +106,15 @@ function DriftwoodApp() {
 
         // Increment count locally so it updates immediately for the user
         setTotalCalls((prev) => {
-          const nextCount = prev !== null ? prev + 1 : 1;
+          let latestCachedVal = null;
+          if (typeof window !== "undefined") {
+            const cached = localStorage.getItem("driftwood_total_calls");
+            if (cached) {
+              latestCachedVal = parseInt(cached, 10);
+            }
+          }
+          const currentVal = prev !== null ? prev : (latestCachedVal !== null ? latestCachedVal : 0);
+          const nextCount = currentVal + 1;
           localStorage.setItem("driftwood_total_calls", String(nextCount));
           return nextCount;
         });
