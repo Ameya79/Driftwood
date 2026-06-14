@@ -132,3 +132,15 @@ export function generateEmbedSnippet(
   style="border-radius: 8px; border: 1px solid #e5e7eb;"
 ></iframe>`;
 }
+
+/**
+ * Fetch the global stats (total simulations run).
+ */
+export async function fetchStats(): Promise<number> {
+  const res = await fetch(`${API_BASE}/stats`);
+  if (!res.ok) {
+    throw new Error("Failed to fetch stats");
+  }
+  const data = await res.json();
+  return data.total_simulations;
+}

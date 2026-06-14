@@ -9,7 +9,7 @@ import SimulationChart from "@/components/SimulationChart";
 import MetricsPanel from "@/components/MetricsPanel";
 import CopyApiButton from "@/components/CopyApiButton";
 import EmbedButton from "@/components/EmbedButton";
-import { runSimulation, type SimulationResult, type SimulationParams } from "@/lib/api";
+import { runSimulation, fetchStats, type SimulationResult, type SimulationParams } from "@/lib/api";
  
 function DriftwoodApp() {
   const searchParams = useSearchParams();
@@ -34,23 +34,21 @@ function DriftwoodApp() {
 
   const [totalCalls, setTotalCalls] = useState<number | null>(null);
 
-  // Fetch global stats on mount
+  // Fetch global stats on mount and poll periodically
   useEffect(() => {
-    const fetchStats = async () => {
+    const loadStats = async () => {
       try {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || window.location.origin;
-        const res = await fetch(`${apiBase}/v1/stats`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && typeof data.total_simulations === "number") {
-            setTotalCalls(data.total_simulations);
-          }
-        }
+        const count = await fetchStats();
+        setTotalCalls(count);
       } catch {
         // Silent fallback
       }
     };
-    fetchStats();
+    loadStats();
+
+    // Poll every 10 seconds to keep counter fresh with verified API calls made globally
+    const interval = setInterval(loadStats, 10000);
+    return () => clearInterval(interval);
   }, []);
  
   // Auto-run if URL has params
@@ -137,9 +135,11 @@ function DriftwoodApp() {
           <h1 className="hero-title">Driftwood</h1>
           <p className="hero-subtitle">Monte Carlo Risk Engine</p>
           {totalCalls !== null && totalCalls > 0 && (
-            <p className="mt-2 text-xs font-mono text-slate-400">
-              {totalCalls.toLocaleString()} simulations run to date
-            </p>
+            <div className="stats-badge">
+              <span className="stats-dot" />
+              <span className="stats-count">{totalCalls.toLocaleString()}</span>
+              <span>simulations run to date</span>
+            </div>
           )}
         </header>
 
