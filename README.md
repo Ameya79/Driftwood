@@ -1,94 +1,86 @@
-<p align="center">
-  <img src="https://via.placeholder.com/120x120/0a0a0a/d6cfc4?text=🪵" alt="Driftwood Logo" width="80" />
-</p>
+# Driftwood
 
-<h1 align="center">Driftwood</h1>
-<p align="center">
-  <strong>Open-source Monte Carlo simulation engine for equity price paths</strong>
-</p>
+Driftwood is an open-source, API-first Monte Carlo risk engine designed to generate stock price trajectories for modeling equity risk, estimating option prices, and calculating Value-at-Risk (VaR) in financial applications. It simulates equity price paths using Geometric Brownian Motion (GBM) and ships with an interactive Next.js frontend, a FastAPI backend, and an iframe embed widget.
 
-<p align="center">
-  <a href="https://driftwood.run">Live Demo</a> ·
-  <a href="#api-documentation">API Docs</a> ·
-  <a href="#self-host">Self-Host Guide</a> ·
-  <a href="#embed">Embed Widget</a>
-</p>
+## Features
 
-<p align="center">
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-blue.svg" />
-  <img alt="Python" src="https://img.shields.io/badge/python-3.11+-blue.svg" />
-  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-14-black.svg" />
-</p>
-
----
-
-## What is Driftwood?
-
-Driftwood is an open-source, API-first Monte Carlo risk engine designed to generate stock price trajectories for modeling equity risk, estimating option prices, and calculating Value-at-Risk (VaR) in your financial applications. It simulates equity price paths using Geometric Brownian Motion (GBM) and ships as:
-
-- 🌐 A hosted web UI at driftwood.run — zero installation or account configuration
-- 🔌 A stateless REST API to embed directly into your own app, backtesting engine, or dashboard
-- 📦 An interactive embeddable widget for financial blogs, websites, and research notebooks
+- **Stochastic Path Generation**: Run simulations using Geometric Brownian Motion (GBM) dynamically calibrated to historical stock data.
+- **Percentile Tracking**: Access P10 (Bear), P50 (Median), and P90 (Bull) paths in a clean JSON format.
+- **Key Financial Metrics**: Calculate annualized volatility, probability of profit, and final mean values.
+- **Developer First**: Fully stateless API, no authentication keys required, with dynamic integration guides (cURL, JS, Python, HTML iFrame).
+- **Modern UI**: A white-themed, high-performance web dashboard built using Next.js and Recharts.
 
 ---
 
 ## Quick Start
 
-### Run locally (2 minutes)
+### 1. Run Locally
 
+Start the backend:
 ```bash
-# 1. Clone
-git clone https://github.com/your-org/driftwood.git
-cd driftwood
-
-# 2. Start the backend
 cd backend
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+python -m uvicorn api.index:app --reload --port 8000
+```
 
-# 3. In another terminal — start the frontend
+Start the frontend in another terminal:
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and run your first simulation.
+Open `http://localhost:3000` to run your first simulation.
 
-### Self-host with Docker
-
+### 2. Self-Host with Docker
 ```bash
-git clone https://github.com/your-org/driftwood.git
-cd driftwood
-cp .env.example .env
-docker compose up
+docker compose up --build
 ```
-
 Accessible at `http://localhost:3000`.
 
 ---
 
-## API Documentation
+## Vercel Deployment
 
-All endpoints are versioned under `/v1/`.
+Driftwood is structured as a monorepo that deploys seamlessly to Vercel as two separate services.
 
-### `GET /health`
+### Backend Deployment (FastAPI Serverless)
+1. Import this repository into Vercel.
+2. In the project settings, set the **Root Directory** to `backend`.
+3. Keep the **Framework Preset** as **Other**. Vercel will automatically read `vercel.json` and serve the FastAPI application as Python Serverless Functions.
+4. Click **Deploy**. Copy the generated backend URL (e.g. `https://your-backend.vercel.app`).
 
+### Frontend Deployment (Next.js)
+1. Import this repository into Vercel as a new project.
+2. Set the **Root Directory** to `frontend`. Vercel will auto-detect Next.js.
+3. In **Environment Variables**, add:
+   - **Key**: `NEXT_PUBLIC_API_URL`
+   - **Value**: Your backend Vercel URL (e.g., `https://your-backend.vercel.app`).
+4. Click **Deploy**.
+
+---
+
+## API Reference
+
+### Health Check
+`GET /health`
 ```bash
-curl http://localhost:8000/health
+curl https://your-backend.vercel.app/health
 ```
-
 ```json
 { "status": "ok", "version": "1.0.0" }
 ```
 
-### `POST /v1/simulate`
+### Run Simulation
+`POST /v1/simulate`
 
-Run a full Monte Carlo simulation. Returns percentile paths + metrics.
-
-```bash
-curl -X POST http://localhost:8000/v1/simulate \
-  -H "Content-Type: application/json" \
-  -d '{"ticker": "AAPL", "days": 30, "simulations": 500}'
+**Request Body:**
+```json
+{
+  "ticker": "AAPL",
+  "days": 30,
+  "simulations": 100
+}
 ```
 
 **Response:**
@@ -97,136 +89,64 @@ curl -X POST http://localhost:8000/v1/simulate \
   "ticker": "AAPL",
   "current_price": 189.43,
   "percentiles": {
-    "p10": [189.43, 183.1, "..."],
-    "p50": [189.43, 191.4, "..."],
-    "p90": [189.43, 199.7, "..."]
+    "p10": [189.43, 183.1, 180.2],
+    "p50": [189.43, 191.4, 192.5],
+    "p90": [189.43, 199.7, 203.1]
   },
   "metrics": {
     "mean_final": 193.21,
-    "p10_final": 171.3,
-    "p50_final": 191.4,
-    "p90_final": 218.7,
+    "p10_final": 171.30,
+    "p50_final": 191.40,
+    "p90_final": 218.70,
     "volatility_annual": 0.284,
     "prob_profit": 0.613
   }
 }
 ```
 
-### `POST /v1/metrics`
-
-Lighter endpoint — returns only the metrics object (no path arrays).
-
-```bash
-curl -X POST http://localhost:8000/v1/metrics \
-  -H "Content-Type: application/json" \
-  -d '{"ticker": "NVDA", "days": 60, "simulations": 1000}'
-```
-
-### Validation
-
-| Parameter     | Type   | Range    |
-|---------------|--------|----------|
-| `ticker`      | string | 1–5 uppercase chars |
-| `days`        | int    | 7–252    |
-| `simulations` | int    | 10–1,000 |
-
-### Errors
-
-| Code | Description |
-|------|-------------|
-| `404` | Ticker not found or no data available |
-| `422` | Validation error (bad input params) |
-| `500` | Internal server error |
-
----
-
-## Embed Widget
-
-Add a live Monte Carlo simulation to any page:
-
-```html
-<script
-  src="https://driftwood.run/widget.js"
-  data-ticker="AAPL"
-  data-days="30"
-  data-sims="500"
-  data-theme="dark"
-></script>
-```
-
-Options:
-
-| Attribute      | Default  | Description |
-|----------------|----------|-------------|
-| `data-ticker`  | `AAPL`   | Stock ticker symbol |
-| `data-days`    | `30`     | Trading days to simulate |
-| `data-sims`    | `500`    | Number of simulations |
-| `data-theme`   | `dark`   | `dark` or `light` |
-
 ---
 
 ## Architecture
 
 ```
-Browser (Next.js)
+Browser (Next.js App)
       │
       │  /api/* (Next.js Rewrite Proxy)
       ▼
-Vercel Serverless (FastAPI)  ← Monte Carlo engine, in-memory cache, yfinance data
+Vercel Serverless (FastAPI)  ← Monte Carlo engine, Thread-safe cache, yfinance
 ```
 
 ---
 
 ## The Math
 
-Driftwood uses **Geometric Brownian Motion (GBM)**, the industry standard for equity path simulation:
+Driftwood uses Geometric Brownian Motion (GBM) to forecast equity price paths:
 
-```
-S(t+1) = S(t) × exp((μ - σ²/2)Δt + σ√Δt × Z)
-```
+$$S(t+1) = S(t) \times \exp\left((\mu - \frac{\sigma^2}{2})\Delta t + \sigma\sqrt{\Delta t} \times Z\right)$$
 
 Where:
-- **S(t)** = price at time t
-- **μ** = annualised drift (mean of historical log returns × 252)
-- **σ** = annualised volatility (std of log returns × √252)
-- **Z** ~ N(0,1) random shock
-- **Δt** = 1/252 (one trading day)
-
----
-
-## Contributing
-
-We welcome contributions! Some good starting points:
-
-- 🏷️ **`good first issue`** — Great for first-time contributors
-- 📊 **`model-request`** — Add new stochastic models (Heston, GARCH, Jump Diffusion)
-- 🔌 **`integrations`** — Connect to new data sources or platforms
-
-### Extension Points
-
-The simulation engine is modular by design. To add a new model:
-
-1. Create a new file in `backend/` (e.g., `heston.py`)
-2. Implement a `run_simulation(prices, days, simulations)` function
-3. Add a `model` parameter to the API request
-4. Submit a PR!
+- $S(t)$ = stock price at time $t$
+- $\mu$ = annualized historical drift
+- $\sigma$ = annualized historical volatility
+- $Z \sim N(0, 1)$ = standard normal random variable
+- $\Delta t = 1/252$ = single trading day step
 
 ---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|---|---|
 | Frontend | Next.js 14 (App Router) |
-| Styling | Tailwind CSS |
+| Styling | Custom Vanilla CSS + Tailwind |
 | Charts | Recharts |
-| Cache | Thread-safe In-memory Cache (FastAPI) |
-| Backend | FastAPI (Python) |
+| Cache | Thread-Safe In-Memory |
+| Backend | FastAPI (Python 3.11+) |
 | Data | yfinance |
-| Math | numpy (vectorised) |
+| Math | numpy (vectorized simulation) |
 
 ---
 
 ## License
 
-[MIT](LICENSE) — use it, fork it, ship it.
+MIT License — feel free to fork, self-host, and integrate into your own projects.
