@@ -1,11 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
 export default function DocsPage() {
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [origin, setOrigin] = useState("http://localhost:8000");
+  const [frontendOrigin, setFrontendOrigin] = useState("http://localhost:3000");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || window.location.origin;
+      setOrigin(apiBase);
+      setFrontendOrigin(window.location.origin);
+    }
+  }, []);
 
   const handleCopy = (code: string, id: string) => {
     navigator.clipboard.writeText(code);
@@ -13,11 +23,11 @@ export default function DocsPage() {
     setTimeout(() => setCopiedCode(null), 2000);
   };
 
-  const curlCode = `curl -X POST http://localhost:8000/v1/simulate \\
+  const curlCode = `curl -X POST ${origin}/v1/simulate \\
   -H "Content-Type: application/json" \\
   -d '{"ticker": "AAPL", "days": 30, "simulations": 100}'`;
 
-  const jsCode = `fetch("http://localhost:8000/v1/simulate", {
+  const jsCode = `fetch("${origin}/v1/simulate", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -35,7 +45,7 @@ export default function DocsPage() {
   const pythonCode = `import urllib.request
 import json
 
-url = "http://localhost:8000/v1/simulate"
+url = "${origin}/v1/simulate"
 payload = {"ticker": "AAPL", "days": 30, "simulations": 100}
 
 req = urllib.request.Request(
@@ -50,7 +60,7 @@ with urllib.request.urlopen(req) as response:
     print(f"Median final price: {data['metrics']['p50_final']}")`;
 
   const embedCode = `<iframe
-  src="http://localhost:3000/?ticker=AAPL&days=30&sims=100&embed=true"
+  src="${frontendOrigin}/?ticker=AAPL&days=30&sims=100&embed=true"
   width="100%"
   height="420"
   frameborder="0"
@@ -119,7 +129,7 @@ with urllib.request.urlopen(req) as response:
 
             <div className="bg-slate-50 border border-slate-100 p-4 font-mono text-xs flex flex-col gap-2">
               <div><strong>Request URL:</strong></div>
-              <div className="text-slate-800">http://localhost:8000/v1/simulate</div>
+              <div className="text-slate-800">{origin}/v1/simulate</div>
               <div className="mt-2"><strong>Request Body parameters:</strong></div>
               <ul className="list-disc pl-4 text-slate-600 flex flex-col gap-1">
                 <li><code>ticker</code> (string): The stock symbol in uppercase (e.g. <code>&quot;AAPL&quot;</code>).</li>

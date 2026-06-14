@@ -25,6 +25,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -132,10 +133,10 @@ body {
   border: none;
   border-bottom: 1px solid var(--color-border);
   border-radius: 0; /* sharp corners */
-  padding: 8px 0;
+  padding: 8px 0 9px 0; /* 9px padding-bottom + 1px border = 10px */
   width: 100%;
   outline: none;
-  transition: border-bottom 0.15s ease;
+  transition: border-bottom 0.15s ease, padding-bottom 0.15s ease;
   text-transform: uppercase;
 }
 
@@ -145,6 +146,7 @@ body {
 
 .ticker-input-field:focus {
   border-bottom: 2px solid var(--color-accent); /* 2px bottom border only in active state */
+  padding-bottom: 8px; /* 8px padding-bottom + 2px border = 10px */
 }
 
 /* Flat dark submit button */
@@ -350,11 +352,12 @@ body {
   flex-direction: column;
   gap: 6px;
   box-shadow: none; /* no box shadow */
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .metric-card:hover {
   border-color: var(--color-accent);
+  background-color: #faf8f5; /* extremely light warm beige */
 }
 
 .metric-label {
@@ -507,16 +510,27 @@ body {
   padding: 10px 16px;
   text-align: left;
   border-bottom: 1px solid var(--color-border);
+  border-left: 2px solid transparent; /* default invisible left border */
 }
 
 .data-table th {
   background: var(--color-light-bg);
   font-weight: 600;
   color: var(--color-muted);
+  border-left: none;
 }
 
 .data-table tr:hover td {
   background: #fcfbf9;
+}
+
+.data-table tr.active-row td {
+  background: #faf6f0 !important;
+  font-weight: 600;
+}
+
+.data-table tr.active-row td:first-child {
+  border-left: 2px solid var(--color-accent); /* visual anchor for selected day */
 }
 
 /* ── Action Panels (cURL & Embed) ── */
@@ -588,6 +602,7 @@ body {
 .empty-state {
   text-align: center;
   padding: 80px 20px;
+  background: var(--color-light-bg);
   border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
@@ -1012,7 +1027,10 @@ body {
     height: 260px;
   }
   .chart-container {
-    padding: 16px 12px;
+    padding: 16px 8px;
+  }
+  .recharts-cartesian-axis-label {
+    display: none; /* Hide axis labels on mobile to save space */
   }
 
   /* Compact Chart Header */

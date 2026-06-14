@@ -205,9 +205,8 @@ function DriftwoodApp() {
                   {result.percentiles.p50.map((_, idx) => (
                     <tr
                       key={idx}
-                      style={idx === inspectorDay ? { background: "#faf7f2" } : {}}
                       onClick={() => setInspectorDay(idx)}
-                      className="cursor-pointer"
+                      className={`cursor-pointer ${idx === inspectorDay ? "active-row" : ""}`}
                     >
                       <td>Day {idx} {idx === 0 ? "(Initial)" : ""}</td>
                       <td className="text-negative">${result.percentiles.p10[idx]?.toFixed(2)}</td>

@@ -123,6 +123,7 @@ export default function SimulationChart({ result }: SimulationChartProps) {
             />
 
             <Tooltip
+              cursor={{ stroke: "#e2e8f0", strokeWidth: 1 }}
               contentStyle={{
                 backgroundColor: COLORS.tooltip.bg,
                 border: `1px solid ${COLORS.tooltip.border}`,
@@ -183,7 +184,7 @@ export default function SimulationChart({ result }: SimulationChartProps) {
               stroke={COLORS.p10}
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: COLORS.p10 }}
+              activeDot={{ r: 3, fill: COLORS.p10, stroke: "#ffffff", strokeWidth: 1 }}
               isAnimationActive={false}
             />
 
@@ -195,7 +196,7 @@ export default function SimulationChart({ result }: SimulationChartProps) {
               stroke={COLORS.p50}
               strokeWidth={3}
               dot={false}
-              activeDot={{ r: 5, fill: COLORS.p50 }}
+              activeDot={{ r: 4, fill: COLORS.p50, stroke: "#ffffff", strokeWidth: 1 }}
               isAnimationActive={false}
             />
 
@@ -207,7 +208,7 @@ export default function SimulationChart({ result }: SimulationChartProps) {
               stroke={COLORS.p90}
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 4, fill: COLORS.p90 }}
+              activeDot={{ r: 3, fill: COLORS.p90, stroke: "#ffffff", strokeWidth: 1 }}
               isAnimationActive={false}
             />
           </LineChart>

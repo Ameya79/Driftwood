@@ -170,13 +170,9 @@ Options:
 ```
 Browser (Next.js)
       │
-      │  /api/*
+      │  /api/* (Next.js Rewrite Proxy)
       ▼
-Cloudflare Worker     ← Edge: CORS, KV caching, rate limiting
-      │
-      │  HTTP
-      ▼
-FastAPI (Python)      ← Monte Carlo engine, yfinance data
+Vercel Serverless (FastAPI)  ← Monte Carlo engine, in-memory cache, yfinance data
 ```
 
 ---
@@ -224,7 +220,7 @@ The simulation engine is modular by design. To add a new model:
 | Frontend | Next.js 14 (App Router) |
 | Styling | Tailwind CSS |
 | Charts | Recharts |
-| Edge | Cloudflare Workers + KV |
+| Cache | Thread-safe In-memory Cache (FastAPI) |
 | Backend | FastAPI (Python) |
 | Data | yfinance |
 | Math | numpy (vectorised) |
