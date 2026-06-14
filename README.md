@@ -5,7 +5,7 @@
 <h1 align="center">Driftwood</h1>
 
 <p align="center">
-  <strong>A free, stateless, high-performance Monte Carlo risk engine for stock price simulations.</strong>
+  <strong>A free, stateless, high-performance Monte Carlo risk engine Web-API for stock price simulations.</strong>
 </p>
 
 <p align="center">
