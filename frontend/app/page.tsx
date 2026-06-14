@@ -10,6 +10,24 @@ import MetricsPanel from "@/components/MetricsPanel";
 import CopyApiButton from "@/components/CopyApiButton";
 import EmbedButton from "@/components/EmbedButton";
 import { runSimulation, fetchStats, type SimulationResult, type SimulationParams } from "@/lib/api";
+
+// Helper functions for robust localStorage cache management
+const getCachedCalls = (): number => {
+  if (typeof window !== "undefined") {
+    const cached = localStorage.getItem("driftwood_total_calls");
+    if (cached) {
+      const val = parseInt(cached, 10);
+      return isNaN(val) ? 0 : val;
+    }
+  }
+  return 0;
+};
+
+const saveCachedCalls = (val: number) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("driftwood_total_calls", String(val));
+  }
+};
  
 function DriftwoodApp() {
   const searchParams = useSearchParams();
@@ -32,37 +50,24 @@ function DriftwoodApp() {
   const [showCopyPanel, setShowCopyPanel] = useState(false);
   const [showEmbedPanel, setShowEmbedPanel] = useState(false);
 
-  const [totalCalls, setTotalCalls] = useState<number | null>(null);
+  const [totalCalls, setTotalCalls] = useState<number>(0);
 
   // Fetch global stats on mount and poll periodically
   useEffect(() => {
     // 1. Instantly restore from localStorage to prevent flash/disappearance on reload
-    let initialCachedVal: number | null = null;
-    if (typeof window !== "undefined") {
-      const cached = localStorage.getItem("driftwood_total_calls");
-      if (cached) {
-        initialCachedVal = parseInt(cached, 10);
-        setTotalCalls(initialCachedVal);
-      }
-    }
+    const cached = getCachedCalls();
+    setTotalCalls(cached);
 
     const loadStats = async () => {
       try {
         const count = await fetchStats();
         if (typeof count === "number" && count >= 0) {
           setTotalCalls((prev) => {
-            // Read latest cached value from localStorage inside the state updater 
-            // to avoid race conditions with React's asynchronous state rendering.
-            let latestCachedVal = initialCachedVal;
-            if (typeof window !== "undefined") {
-              const cached = localStorage.getItem("driftwood_total_calls");
-              if (cached) {
-                latestCachedVal = parseInt(cached, 10);
-              }
-            }
-            const currentVal = prev !== null ? prev : (latestCachedVal !== null ? latestCachedVal : 0);
-            const nextCount = Math.max(currentVal, count);
-            localStorage.setItem("driftwood_total_calls", String(nextCount));
+            // Get fresh cached value directly from localStorage to prevent race conditions
+            const latestCached = getCachedCalls();
+            const currentMax = Math.max(prev, latestCached);
+            const nextCount = Math.max(currentMax, count);
+            saveCachedCalls(nextCount);
             return nextCount;
           });
         }
@@ -106,16 +111,10 @@ function DriftwoodApp() {
 
         // Increment count locally so it updates immediately for the user
         setTotalCalls((prev) => {
-          let latestCachedVal = null;
-          if (typeof window !== "undefined") {
-            const cached = localStorage.getItem("driftwood_total_calls");
-            if (cached) {
-              latestCachedVal = parseInt(cached, 10);
-            }
-          }
-          const currentVal = prev !== null ? prev : (latestCachedVal !== null ? latestCachedVal : 0);
-          const nextCount = currentVal + 1;
-          localStorage.setItem("driftwood_total_calls", String(nextCount));
+          const latestCached = getCachedCalls();
+          const currentMax = Math.max(prev, latestCached);
+          const nextCount = currentMax + 1;
+          saveCachedCalls(nextCount);
           return nextCount;
         });
  
@@ -172,13 +171,11 @@ function DriftwoodApp() {
           </div>
           <h1 className="hero-title">Driftwood</h1>
           <p className="hero-subtitle">Monte Carlo Risk Engine</p>
-          {totalCalls !== null && totalCalls > 0 && (
-            <div className="stats-badge">
-              <span className="stats-dot" />
-              <span className="stats-count">{totalCalls.toLocaleString()}</span>
-              <span>simulations run to date</span>
-            </div>
-          )}
+          <div className="stats-badge">
+            <span className="stats-dot" />
+            <span className="stats-count">{totalCalls.toLocaleString()}</span>
+            <span>simulations run to date</span>
+          </div>
         </header>
 
 
