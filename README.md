@@ -24,11 +24,11 @@
 
 ## What is Driftwood?
 
-Driftwood is a **self-hostable, API-first Monte Carlo risk engine** that simulates equity price paths using Geometric Brownian Motion (GBM). It ships as:
+Driftwood is an open-source, API-first Monte Carlo risk engine designed to generate stock price trajectories for modeling equity risk, estimating option prices, and calculating Value-at-Risk (VaR) in your financial applications. It simulates equity price paths using Geometric Brownian Motion (GBM) and ships as:
 
-- 🌐 **A hosted web UI** at [driftwood.run](https://driftwood.run) — no install, no account
-- 🔌 **A REST API** you can drop into your own app, backtest, or dashboard
-- 📦 **An embeddable widget** for quant bloggers and educators
+- 🌐 A hosted web UI at driftwood.run — zero installation or account configuration
+- 🔌 A stateless REST API to embed directly into your own app, backtesting engine, or dashboard
+- 📦 An interactive embeddable widget for financial blogs, websites, and research notebooks
 
 ---
 

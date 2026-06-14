@@ -112,11 +112,10 @@ with urllib.request.urlopen(req) as response:
           <section id="intro" className="flex flex-col gap-3">
             <h2 className="text-xl font-bold tracking-tight border-b border-slate-100 pb-2">Introduction</h2>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Welcome to Driftwood! Driftwood is a simple and fast **Monte Carlo simulation engine** for stock prices.
-              It uses Geometric Brownian Motion (GBM) to forecast future price paths based on historical stock data.
+              Welcome to Driftwood! This API allows you to programmatically generate thousands of stock price trajectories to model equity risk, calculate Value-at-Risk (VaR), and estimate options pricing directly in your own applications. Under the hood, Driftwood runs a Monte Carlo simulation engine powered by Geometric Brownian Motion (GBM) using historical stock drift and volatility.
             </p>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Our API is entirely stateless and does not require any authentication keys. You can plug it directly into your own dashboards, fintech apps, options pricing widgets, or research notebooks.
+              Our API is entirely stateless and does not require any authentication keys. You can plug it directly into your dashboards, financial planning tools, options calculators, or research notebooks to bring interactive probability models to your users.
             </p>
           </section>
 
