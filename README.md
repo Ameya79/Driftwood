@@ -14,7 +14,7 @@ Driftwood is an open-source, API-first Monte Carlo risk engine designed to gener
 
 ## Quick Start
 
-### 1. Run Locally
+### Run Locally
 
 Start the backend:
 ```bash
@@ -32,74 +32,51 @@ npm run dev
 
 Open `http://localhost:3000` to run your first simulation.
 
-### 2. Self-Host with Docker
-```bash
-docker compose up --build
-```
-Accessible at `http://localhost:3000`.
-
 ---
 
-## Vercel Deployment
+## Integrating the API into your App
 
-Driftwood is structured as a monorepo that deploys seamlessly to Vercel as two separate services.
+You can call the Driftwood API from any frontend or backend application to bring Monte Carlo risk modeling to your users.
 
-### Backend Deployment (FastAPI Serverless)
-1. Import this repository into Vercel.
-2. In the project settings, set the **Root Directory** to `backend`.
-3. Keep the **Framework Preset** as **Other**. Vercel will automatically read `vercel.json` and serve the FastAPI application as Python Serverless Functions.
-4. Click **Deploy**. Copy the generated backend URL (e.g. `https://your-backend.vercel.app`).
+### 1. The Request (JavaScript / TypeScript Fetch)
 
-### Frontend Deployment (Next.js)
-1. Import this repository into Vercel as a new project.
-2. Set the **Root Directory** to `frontend`. Vercel will auto-detect Next.js.
-3. In **Environment Variables**, add:
-   - **Key**: `NEXT_PUBLIC_API_URL`
-   - **Value**: Your backend Vercel URL (e.g., `https://your-backend.vercel.app`).
-4. Click **Deploy**.
+Send a POST request to `/v1/simulate` with the target ticker, days to forecast, and number of simulation runs:
 
----
+```javascript
+const response = await fetch("https://your-backend-url.vercel.app/v1/simulate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    ticker: "AAPL",       // Stock symbol (1-5 chars)
+    days: 30,             // Forecasting horizon (7-252 trading days)
+    simulations: 100      // Number of simulation paths (10-1000)
+  })
+});
 
-## API Reference
-
-### Health Check
-`GET /health`
-```bash
-curl https://your-backend.vercel.app/health
-```
-```json
-{ "status": "ok", "version": "1.0.0" }
+const data = await response.json();
+console.log(data);
 ```
 
-### Run Simulation
-`POST /v1/simulate`
+### 2. The Response Structure
 
-**Request Body:**
-```json
-{
-  "ticker": "AAPL",
-  "days": 30,
-  "simulations": 100
-}
-```
+The API returns a clean JSON payload:
 
-**Response:**
 ```json
 {
   "ticker": "AAPL",
   "current_price": 189.43,
   "percentiles": {
-    "p10": [189.43, 183.1, 180.2],
-    "p50": [189.43, 191.4, 192.5],
-    "p90": [189.43, 199.7, 203.1]
+    "p10": [189.43, 183.1, 180.2],  // Bearish envelope path
+    "p50": [189.43, 191.4, 192.5],  // Median expected path
+    "p90": [189.43, 199.7, 203.1]   // Bullish envelope path
   },
   "metrics": {
-    "mean_final": 193.21,
+    "mean_final": 193.21,           // Expected average final price
     "p10_final": 171.30,
     "p50_final": 191.40,
     "p90_final": 218.70,
-    "volatility_annual": 0.284,
-    "prob_profit": 0.613
+    "volatility_annual": 0.284,      // Annualized historical volatility
+    "prob_profit": 0.613             // Probability price ends higher than starting price
   }
 }
 ```
