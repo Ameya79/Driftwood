@@ -75,9 +75,10 @@ def increment_api_calls():
     if not KV_URL or not KV_TOKEN:
         return
     try:
+        url = KV_URL if KV_URL.endswith("/") else f"{KV_URL}/"
         body = json.dumps(["INCR", "stats:api_calls"]).encode("utf-8")
         req = urllib.request.Request(
-            KV_URL,
+            url,
             data=body,
             headers={
                 "Authorization": f"Bearer {KV_TOKEN}",
@@ -94,9 +95,10 @@ def get_api_calls():
     if not KV_URL or not KV_TOKEN:
         return 0
     try:
+        url = KV_URL if KV_URL.endswith("/") else f"{KV_URL}/"
         body = json.dumps(["GET", "stats:api_calls"]).encode("utf-8")
         req = urllib.request.Request(
-            KV_URL,
+            url,
             data=body,
             headers={
                 "Authorization": f"Bearer {KV_TOKEN}",
