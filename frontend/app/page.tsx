@@ -329,6 +329,38 @@ function DriftwoodApp() {
           </p>
         </section>
       )}
+      {/* Search Engine Optimization (SEO) & AI Context Section */}
+      <section className="seo-content-section" style={{ maxWidth: "1200px", margin: "40px auto 20px", padding: "40px 24px 20px", borderTop: "1px solid var(--color-border)" }}>
+        <h2 style={{ fontSize: "1.4rem", fontWeight: 700, marginBottom: "16px", color: "var(--color-text)" }}>DRIFTWOOD | Monte Carlo Stock Simulation & Risk Engine API</h2>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "24px", color: "var(--color-text-muted)", fontSize: "0.9rem", lineHeight: "1.6" }}>
+          <div>
+            <h3 style={{ fontSize: "1.05rem", fontWeight: 600, marginBottom: "8px", color: "var(--color-text)" }}>DRIFTWOOD API</h3>
+            <p>
+              Driftwood is an open-source, API-first quantitative finance risk engine written in Python (FastAPI). It enables developers and quants to calibrate stock price forecast models on historical daily market data without complex setups, API keys, or database integrations.
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: "1.05rem", fontWeight: 600, marginBottom: "8px", color: "var(--color-text)" }}>MONTECARLO PYTHON</h3>
+            <p>
+              By utilizing NumPy vectorization, our engine runs thousands of Monte Carlo trajectories in parallel. Instead of executing slow loops in Python, we generate high-speed random walk paths across standard normal matrices, projecting price bounds in milliseconds.
+            </p>
+          </div>
+          <div>
+            <h3 style={{ fontSize: "1.05rem", fontWeight: 600, marginBottom: "8px", color: "var(--color-text)" }}>GEOMETRIC BROWNIAN MOTION</h3>
+            <p>
+              The engine simulates stock price paths using Geometric Brownian Motion (GBM). It extracts historical asset drift (average rate of return) and volatility (standard deviation of return logs) to project P10 (bearish), P50 (median), and P90 (bullish) price envelopes.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ marginTop: "24px", color: "var(--color-text-muted)", fontSize: "0.9rem", lineHeight: "1.6" }}>
+          <h3 style={{ fontSize: "1.05rem", fontWeight: 600, marginBottom: "8px", color: "var(--color-text)" }}>Exposing the API Programmatically</h3>
+          <p>
+            You can make a stateless HTTP POST request to the <code>/v1/simulate</code> endpoint. Send a JSON body containing the stock ticker, days to forecast, and number of simulations. The API returns full percentiles, sample paths, annualized volatility, and probability of profit in JSON format. View our <Link href="/docs" style={{ color: "var(--color-accent)", textDecoration: "underline" }}>API Documentation</Link> for JavaScript, Python, cURL, and HTML iframe widget integration code.
+          </p>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="app-footer">

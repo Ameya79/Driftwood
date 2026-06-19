@@ -2,33 +2,43 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Driftwood — Monte Carlo Risk Engine",
+  title: "DRIFTWOOD | Monte Carlo Stock Simulation & Risk Engine API",
   description:
-    "Open-source Monte Carlo simulation engine for equity price paths. Run GBM simulations on real market data with a clean API and interactive charts.",
+    "Open-source Monte Carlo stock simulation and risk engine in Python (FastAPI). Calibrate and run Geometric Brownian Motion (GBM) trajectories on real market data. Free, stateless API for quant finance and options pricing.",
   keywords: [
-    "monte carlo simulation",
-    "stock simulation",
-    "GBM",
-    "geometric brownian motion",
-    "risk engine",
-    "quant finance",
-    "open source",
+    "DRIFTWOOD",
+    "DRIFTWOOD API",
+    "MONTECARLO PYTHON",
+    "MONTE CARLO SIMULATION",
+    "GBM PYTHON",
+    "STOCK SIMULATOR",
+    "GEOMETRIC BROWNIAN MOTION",
+    "RISK ENGINE",
+    "QUANT FINANCE",
+    "VALUE AT RISK",
+    "driftwood",
+    "driftwood api",
+    "montecarlo python",
+    "monte carlo python",
+    "gbm",
+    "options pricing python",
+    "stock risk model",
   ],
   verification: {
     google: "8VloNPk7vdTnnOUBoNUVCvYdM3BeHPAbQwBPnncN3sw",
   },
   openGraph: {
-    title: "Driftwood — Monte Carlo Risk Engine",
+    title: "DRIFTWOOD | Monte Carlo Stock Simulation & Risk Engine API",
     description:
-      "Open-source Monte Carlo simulation engine for equity price paths.",
+      "Open-source Monte Carlo stock simulation and risk engine in Python (FastAPI). Calibrate and run Geometric Brownian Motion (GBM) trajectories.",
     type: "website",
-    url: "https://driftwood.run",
+    url: "https://driftwood-docs.vercel.app",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Driftwood — Monte Carlo Risk Engine",
+    title: "DRIFTWOOD | Monte Carlo Stock Simulation & Risk Engine API",
     description:
-      "Open-source Monte Carlo simulation engine for equity price paths.",
+      "Open-source Monte Carlo stock simulation and risk engine in Python (FastAPI). Calibrate and run Geometric Brownian Motion (GBM) trajectories.",
   },
 };
 

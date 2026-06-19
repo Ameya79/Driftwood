@@ -1,11 +1,31 @@
-# Driftwood API
+# Driftwood API & System Specification
 
-Driftwood is a free, stateless, and high-performance stock simulation API using Monte Carlo Geometric Brownian Motion (GBM). It does not require any authentication keys or headers.
+Driftwood is a free, stateless, and high-performance stock simulation API and quant finance risk engine using Monte Carlo Geometric Brownian Motion (GBM). It does not require any authentication keys or headers.
 
 ## Base URL
-https://your-backend-url.vercel.app
+https://driftwood-docs.vercel.app
 
-Replace with your live deployed FastAPI Vercel URL.
+Replace with your live deployed FastAPI Vercel URL or local environment (`http://localhost:8000`).
+
+---
+
+## Directory & Codebase Structure
+
+- `/backend`: FastAPI Python 3.11+ application.
+  - `/backend/api/index.py`: API endpoints and in-memory rate-limiting middleware.
+  - `/backend/data.py`: Stock price fetching using `yfinance`.
+  - `/backend/simulation.py`: NumPy vectorized Monte Carlo simulation.
+  - `/backend/models.py`: Pydantic request/response schemas.
+  - `/backend/Dockerfile`: Backend production container.
+- `/frontend`: Next.js 14 App Router portal.
+  - `/frontend/app/page.tsx`: Interactive simulator form, chart (Recharts), and stats badge.
+  - `/frontend/app/docs/page.tsx`: Code integration guides.
+  - `/frontend/components/`: Modular simulator and visual layout components.
+- `/nginx.conf`: Rate limiting and proxy zone configs (`rate=20r/s`, `burst=30`).
+- `/docker-compose.yml`: Local orchestrator for frontend, backend, and reverse proxy.
+- `/worker`: Cloudflare worker proxy code.
+
+---
 
 ## API Endpoints
 
@@ -20,9 +40,9 @@ Replace with your live deployed FastAPI Vercel URL.
 - Request Headers:
   - `Content-Type: application/json`
 - Request Body (JSON):
-  - `ticker` (string, required): 1-5 character uppercase stock ticker symbol (e.g., `"AAPL"`, `"TSLA"`).
+  - `ticker` (string, required): 1-5 character uppercase stock ticker symbol (e.g., `"AAPL"`).
   - `days` (number, optional, default: 30, range: 7-252): Future trading days to simulate.
-  - `simulations` (number, optional, default: 100, range: 10-1000): Total number of paths to generate.
+  - `simulations` (number, optional, default: 100, range: 10-1000): Total paths to generate.
 - Response (JSON):
   - `ticker` (string)
   - `current_price` (number): Start price.
@@ -44,11 +64,18 @@ Replace with your live deployed FastAPI Vercel URL.
 - Description: Computes final distribution statistics without returning path arrays. Ideal for lightweight backtesting.
 - Request/Response Schema: Identical to `/v1/simulate` except the response omits `percentiles` and `paths`.
 
+### 4. Global Statistics
+`GET /v1/stats`
+- Description: Gets the total number of simulations run globally (tracked via Upstash Redis).
+- Response: `{"total_simulations": 12450}`
+
+---
+
 ## Integration Examples
 
 ### JavaScript Fetch
 ```javascript
-const response = await fetch("https://your-backend-url.vercel.app/v1/simulate", {
+const response = await fetch("https://driftwood-docs.vercel.app/api/v1/simulate", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -66,7 +93,7 @@ console.log("Median projected price:", data.metrics.p50_final);
 import urllib.request
 import json
 
-url = "https://your-backend-url.vercel.app/v1/simulate"
+url = "https://driftwood-docs.vercel.app/api/v1/simulate"
 payload = {"ticker": "NVDA", "days": 30, "simulations": 100}
 
 req = urllib.request.Request(
@@ -81,10 +108,32 @@ with urllib.request.urlopen(req) as response:
     print(f"Median final price: {data['metrics']['p50_final']}")
 ```
 
+---
+
+## Mathematical Foundation (Geometric Brownian Motion)
+
+Asset trajectories are simulated using the Geometric Brownian Motion (GBM) stochastic differential equation:
+
+$$dS_t = \mu S_t dt + \sigma S_t dW_t$$
+
+Where:
+- $S_t$ is the stock price at time $t$.
+- $\mu$ is the drift coefficient (historical annualized return).
+- $\sigma$ is the diffusion coefficient (annualized volatility).
+- $W_t$ is standard Brownian motion.
+
+Using Itô's Lemma, we integrate this SDE into its closed-form analytical solution:
+
+$$S_t = S_0 \exp\left( \left(\mu - \frac{\sigma^2}{2}\right)t + \sigma W_t \right)$$
+
+Driftwood vectorizes this computation in Python using NumPy to generate matrices of shape `(simulations, days)` in parallel, avoiding slow Python loop execution.
+
+---
+
 ## Rate Limits & Caching
 
 ### Rate Limits
-The API implements a sliding window rate limit of **100 requests per 5 seconds per client IP**. Exceeding this limit returns an HTTP `429 Too Many Requests` status.
+The API implements a sliding window rate limit of **100 requests per 5 seconds per client IP**. Exceeding this limit returns an HTTP `429 Too Many Requests` status. Nginx also enforces a proxy limit of `20r/s` with a `burst=30` queue.
 
 ### Caching Best Practices
 Stock trajectories rely on daily historical market data, making multiple identical simulation calls within the same trading day redundant.
