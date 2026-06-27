@@ -1,9 +1,0 @@
-- [x] Update backend response model to support simulated paths
-- [x] Implement path sampling in the simulation engine
-- [x] Fix the rewrite configuration in `next.config.mjs`
-- [x] Overhaul `globals.css` with the clean, white-themed design system
-- [x] Redesign `page.tsx` for centered single-column layout, hero logo, and day inspector
-- [x] Update `SimulatorForm.tsx` with sharp corners, bottom border on focus, flat button
-- [x] Update `SimulationChart.tsx` to render background paths and P10/P50/P90 lines on white bg
-- [x] Update `MetricsPanel.tsx` to display three flat metric cards
-- [x] Build and verify type safety and API functionality
